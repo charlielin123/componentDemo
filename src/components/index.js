@@ -1,4 +1,4 @@
 import {AutoComplete,autoCompleteConfig} from './AutoComplete';
-import LightBoxdBase from './LightBoxBase.vue';
+import LightBoxBase from './LightBoxBase.vue';
 
-export {AutoComplete,LightBoxdBase,autoCompleteConfig};
+export {AutoComplete,LightBoxBase,autoCompleteConfig};

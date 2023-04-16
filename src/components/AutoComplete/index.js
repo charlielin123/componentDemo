@@ -1,35 +1,39 @@
 import AutoComplete from './AutoComplete.vue'
-import {reactive} from 'vue';
+//@ts-check
+import { reactive } from 'vue'
 /**
  * @class AutoCompleteConfig
  */
 class AutoCompleteConfigClass {
   trigger = false
+  /**
+   * @type {Function}
+   */
   api = () => {}
-  defultData = ''
+  defaultData = ''
   // * trigger = false;
 
-  setDefultData(defaultData) {
-    this.defultData = defaultData || ''
+  setDefaultData(defaultData) {
+    this.defaultData = defaultData || ''
     this.trigger = !this.trigger
   }
   /**
-   * 
+   *
    * @param {Function} api 獲取清單的API Function
    */
-  constructor(api){
-    this.api = api;
+  constructor(api) {
+    this.api = api
   }
 }
 
 /**
-   * 
-   * @param {Function} api 獲取清單的API Function
-   * @returns {AutoCompleteConfigClass} autoCompleteConfig
-   */
+ *
+ * @param {Function} api 獲取清單的API Function
+ * @returns {AutoCompleteConfigClass} autoCompleteConfig
+ */
 function autoCompleteConfig(api) {
-  const auto = new AutoCompleteConfigClass(api);
-  return reactive(auto);
+  const auto = new AutoCompleteConfigClass(api)
+  return reactive(auto)
 }
 
-export { AutoComplete ,autoCompleteConfig}
+export { AutoComplete, autoCompleteConfig }

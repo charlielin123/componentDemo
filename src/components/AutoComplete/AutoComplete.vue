@@ -1,15 +1,25 @@
 <script setup>
-import { watch, toRefs, reactive } from 'vue'
+import { watch, toRefs, reactive, ref } from 'vue'
 //@ts-check
-
+const inputClass = ref('')
+const searching = () => {
+  inputClass.value = 'searching'
+}
+const searched = () => {
+  if (dataList.length > 0) {
+    inputClass.value = 'searched'
+  } else {
+    inputClass.value = 'nothing'
+  }
+}
 const props = defineProps({
   modelValue: {
-    type: [String,null],
+    type: [String, null],
     required: true
   },
   changeFunction: {
     type: Function,
-    default:()=>{},
+    default: () => {},
     required: false
   },
   config: {
@@ -18,7 +28,7 @@ const props = defineProps({
     default: () => {
       return {
         trigger: false,
-        defultData: '',
+        defaultData: '',
         api: () => {}
       }
     }
@@ -27,7 +37,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 const { modelValue } = toRefs(props)
-const { defultData, trigger } = toRefs(props.config)
+const { defaultData, trigger } = toRefs(props.config)
 /**
  * 顯示清單
  * @type {reactive<string[]>}
@@ -60,8 +70,8 @@ const delayDo = (todo, param) => {
   }, timeDelay)
 }
 
-watch([defultData, trigger], () => {
-  console.log('defultData or trigger change')
+watch([defaultData, trigger], () => {
+  console.log('defaultData or trigger change')
   tempList.length = 0
   dataList.length = 0
   clearTimeout(timer)
@@ -71,16 +81,24 @@ watch([defultData, trigger], () => {
  * @param {string} searchKey 查詢關鍵字
  */
 const doSearch = async (searchKey) => {
+  searching()
   /**
    * @type {string[]}
    */
-  const res = await props.config.api(searchKey)
-  console.log(res)
-  tempList = [...tempList, ...res||[]]
+  const res = (await props.config.api(searchKey))||[]
+  // console.log(res)
+  const resPulsId = res.map((x) => {
+    return {
+      value: x,
+      key: Symbol()
+    }
+  })
+  tempList = [...tempList, ...(resPulsId || [])]
   Object.assign(
     dataList,
-    tempList.filter((i) => i.startsWith(searchKey))
+    tempList.filter((i) => i.value.startsWith(searchKey))
   )
+  searched()
 }
 /**
  * 當
@@ -110,7 +128,7 @@ const changeValue = (selectValue) => {
   props.changeFunction()
   dataList.length = 0
 }
-const clearList=()=>{
+const clearList = () => {
   dataList.length = 0
 }
 </script>
@@ -118,13 +136,23 @@ const clearList=()=>{
 <template>
   <div style="width: 300px; position: relative; flex-direction: column" class="d-flex">
     <div class="d-flex">
-      <input style="width: 100% ;padding-right: 2rem;" :value="modelValue" type="text" @input="inputChange($event)" />
-      <button class="btn btn-close" @click="clearList" style="position: absolute; right: 3px;"></button>
+      <input
+        :class="inputClass"
+        style="width: 100%; padding-right: 2rem; box-sizing: border-box"
+        :value="modelValue"
+        type="text"
+        @input="inputChange($event)"
+      />
+      <button
+        class="btn btn-close"
+        @click="clearList"
+        style="position: absolute; right: 3px;top:2px;"
+      ></button>
     </div>
     <div class="list">
-      <template v-for="item in dataList">
-        <div class="border w-100 hover select" @click="changeValue(item)">
-          {{ item }}
+      <template v-for="item in dataList" :key="item.key">
+        <div class="border w-100 hover select" @click="changeValue(item.value)">
+          {{ item.value }}
         </div>
       </template>
     </div>
@@ -145,6 +173,28 @@ const clearList=()=>{
     background-color: rgba(0, 0, 255);
   }
 }
+input{
+  box-sizing: border-box;
+  &:focus{
+    border: rgb(0, 0, 0) solid 0.2rem;
+    box-shadow: 0px 0px 0 2px rgb(255, 255, 255);
+  }
+}
+// .searching {
+//   &:focus{
+//     border: rgb(249, 203, 0) solid 0.2rem;
+//   }
+// }
+// .nothing {
+//   &:focus{
+//     border: rgb(249, 71, 0) solid 0.2rem;
+//   }
+// }
+// .searched {
+//   &:focus{
+//     border: rgb(58, 249, 0) solid 0.2rem;
+//   }
+// }
 .list {
   color: black;
   max-height: 250px;
