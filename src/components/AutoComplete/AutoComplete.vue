@@ -14,7 +14,7 @@ const searched = () => {
 }
 const props = defineProps({
   modelValue: {
-    type: [String, null],
+    type: [String, null, Object],
     required: true
   },
   changeFunction: {
@@ -126,10 +126,46 @@ const inputChange = (e) => {
 const changeValue = (selectValue) => {
   emit('update:modelValue', selectValue)
   props.changeFunction()
-  dataList.length = 0
+  clearList()
 }
+const selectedIndex = ref(null)
 const clearList = () => {
   dataList.length = 0
+  selectedIndex.value = null
+}
+
+watch(selectedIndex, () => {
+  if (selectedIndex.value == null) {
+    return
+  }
+  console.log(selectedIndex.value)
+  document.querySelectorAll('.list .option').forEach((ele) => ele.classList.remove('hover'))
+  if (selectedIndex.value != null) {
+    document.querySelectorAll('.list .option')[selectedIndex.value].classList.add('hover')
+  }
+  emit('update:modelValue', dataList[selectedIndex.value].value)
+})
+
+/**
+ *
+ */
+function goDown() {
+  // if (dataList.length == 0) return
+  if (selectedIndex.value != null && selectedIndex.value != dataList.length - 1) {
+    selectedIndex.value = selectedIndex.value + 1
+  } else {
+    selectedIndex.value = 0
+  }
+  console.log('DOWN')
+}
+function goUp() {
+  if (dataList.length == 0) return
+  if (selectedIndex.value != null && selectedIndex.value != 0) {
+    selectedIndex.value = selectedIndex.value - 1
+  } else {
+    selectedIndex.value = dataList.length - 1
+  }
+  console.log('UP')
 }
 </script>
 
@@ -141,6 +177,9 @@ const clearList = () => {
         style="width: 100%; padding-right: 2rem; box-sizing: border-box"
         :value="modelValue"
         type="text"
+        @keydown.down="goDown($event)"
+        @keydown.up="goUp($event)"
+        @keydown.enter="clearList(), changeFunction()"
         @input="inputChange($event)"
       />
       <button
@@ -150,7 +189,7 @@ const clearList = () => {
       ></button>
     </div>
     <div class="list">
-      <template v-for="item in dataList" :key="item.key">
+      <template v-for="item in dataList" :key="item.value">
         <div class="border w-100 option" @click="changeValue(item.value)">
           {{ item.value }}
         </div>
@@ -163,53 +202,59 @@ const clearList = () => {
 .option {
   user-select: none;
   background-color: white;
-  &:focus {
-    background-color: pink;
-  }
+  user-select: contain;
+
   cursor: pointer;
   &:hover {
     background-color: rgb(98, 179, 255);
   }
 }
-input {
-  // box-sizing: border-box;
-  // &:focus{
-  //   border: rgb(0, 0, 0) solid 0.2rem;
-  //   box-shadow: 0px 0px 0 2px rgb(255, 255, 255);
-  // }
+.hover {
+  background-color: rgb(98, 179, 255);
 }
 
 @keyframes searching1 {
   from {
-    border: yellow solid 0.2rem;
-    box-shadow: 0 0 1px 1px rgb(255, 191, 0);
+    box-shadow: -2px 2px 3px 1px rgb(255, 191, 0);
+    // transform: scale(0);
+  }
+  45% {
+    box-shadow: 2px 2px 3px 1px rgb(255, 191, 0);
     // transform: scale(0);
   }
   50% {
-    border: rgb(255, 153, 0) solid 0.2rem;
-    box-shadow: 0 0 3px 3px rgb(255, 187, 0);
-    // transform: scale(1);
+    box-shadow: 2px -2px 3px 1px rgb(255, 191, 0);
+    // transform: scale(0);
   }
-  to {
-    border: rgb(255, 98, 0) solid 0.2rem;
-    box-shadow: 0 0 6px 6px rgb(255, 123, 0);
-    // transform: scale(2);
+  95% {
+    box-shadow: -2px -2px 3px 1px rgb(255, 191, 0);
+    // transform: scale(0);
+  }
+  100% {
+    box-shadow: -2px 2px 3px 1px rgb(255, 191, 0);
   }
 }
 .searching {
-  animation: searching1 linear alternate-reverse 1s;
-  animation-iteration-count: 10;
-  border: rgb(249, 203, 0) solid 0.2rem;
+  animation: searching1 linear normal  1s;
+  animation-iteration-count: infinite;
 }
-.nothing,
-.nothing:focus,
-.nothing::marker {
-  border: rgb(249, 71, 0) solid 0.2rem;
-  box-shadow: 0 0 5px 0px RED;
+@keyframes searchFailed {
+  from {
+    box-shadow: 0 0 1px 1px red;
+    // transform: scale(0);
+  }
+  to {
+    box-shadow: 0 0 12px 6px red;
+    // transform: scale(1);
+  }
 }
-.searched {
+
+.nothing:focus {
+  animation: searchFailed alternate-reverse .5s 3 ease-in-out;
+}
+.searched:focus {
   border: rgb(58, 249, 0) solid 0.2rem;
-  box-shadow: 0 0 5px 0px rgb(34, 255, 0);
+  box-shadow: 0 0 8px 3px rgb(34, 255, 0);
 }
 .list {
   color: black;

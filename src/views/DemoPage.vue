@@ -306,13 +306,13 @@ const manIdConfig = autoCompleteConfig(getIdListApi)
   justify-content: center;
   align-items: center;
   h1 {
-    color: white;
+    color: black;
   }
 }
 .demo {
   width: 100vw;
   height: 100vh;
-  background-color: rgb(73, 73, 73);
+  // background-color: rgb(73, 73, 73);
 }
 .btn-box {
   .row {
