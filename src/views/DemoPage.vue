@@ -97,6 +97,7 @@ const saveManApi = () => {
       if (index == -1) {
         const temp = Object.assign({}, manReactive)
         manData.push(temp)
+        loaded()
         resolve(manReactive)
         return
       }

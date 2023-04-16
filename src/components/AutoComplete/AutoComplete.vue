@@ -151,7 +151,7 @@ const clearList = () => {
     </div>
     <div class="list">
       <template v-for="item in dataList" :key="item.key">
-        <div class="border w-100 hover select" @click="changeValue(item.value)">
+        <div class="border w-100 option" @click="changeValue(item.value)">
           {{ item.value }}
         </div>
       </template>
@@ -160,17 +160,15 @@ const clearList = () => {
 </template>
 
 <style lang="scss" scoped>
-.select {
+.option {
   user-select: none;
-}
-.hover {
   background-color: white;
   &:focus {
     background-color: pink;
   }
   cursor: pointer;
   &:hover {
-    background-color: rgba(0, 0, 255);
+    background-color: rgb(98, 179, 255);
   }
 }
 input {
