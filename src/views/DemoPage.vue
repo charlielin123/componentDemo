@@ -120,7 +120,7 @@ const saveMan = () => {
 
 function searchSelectListAPI(searchKey) {
   return new Promise((resolve) => {
-    load()
+    // load()
     const t = setTimeout(() => {
       const manList = manData.filter((man) => {
         return man.select.startsWith(searchKey)
@@ -130,8 +130,8 @@ function searchSelectListAPI(searchKey) {
       })
       resolve(res)
       clearTimeout(t)
-      loaded()
-    }, 500)
+      // loaded()
+    }, 2500)
   })
 }
 
@@ -161,7 +161,7 @@ const getIdListApi = (input) => {
       console.log(res)
       clearTimeout(t)
       resolve(res)
-    }, 500)
+    }, 5000)
   })
 }
 const manIdConfig = autoCompleteConfig(getIdListApi)
@@ -174,7 +174,7 @@ const manIdConfig = autoCompleteConfig(getIdListApi)
         <h1>Loading....</h1>
       </div>
     </div>
-    <LightBoxBase v-model:show="showManBox">
+    <LightBoxBase v-model:show="showManBox" esc backdrop>
       <template #title>我是燈箱</template>
       <template #body>
         <div class="container" style="width: 600px">

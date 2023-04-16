@@ -8,7 +8,7 @@ export default {
 <script setup>
 import { ref, computed } from 'vue'
 
-const props = defineProps(['show', 'body_style', 'dis_close_btn', 'dis_close_icon', 'backdrop'])
+const props = defineProps(['show', 'body_style', 'dis_close_btn', 'dis_close_icon', 'backdrop','esc'])
 
 const emit = defineEmits(['update:show'])
 const close = () => {
@@ -46,6 +46,14 @@ const clickOutside = () => {
  * @type {ComputedRef<boolean>}
  * @returns {boolean}
  */
+const escSwitch = computed(() => {
+  return switchFunction('esc')
+})
+/**
+ * 用來判斷是否顯示footer的關閉按鈕
+ * @type {ComputedRef<boolean>}
+ * @returns {boolean}
+ */
 const closeBtnSwitch = computed(() => {
   return switchFunction('dis_close_btn')
 })
@@ -65,7 +73,7 @@ const addClass = ref('')
 
 <template>
   <transition name="lightBox">
-    <div class="outSideContainer" v-if="show" @click.prevent.stop="clickOutside()">
+    <div class="outSideContainer" v-if="show" @click.prevent.stop="clickOutside()" @keydown.esc="escSwitch?'close()':close()">
       <div class="lightBox" :="$attrs" @click.prevent.stop="" :class="addClass">
         <div class="header">
           <h5 class="title">

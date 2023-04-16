@@ -85,7 +85,7 @@ const doSearch = async (searchKey) => {
   /**
    * @type {string[]}
    */
-  const res = (await props.config.api(searchKey))||[]
+  const res = (await props.config.api(searchKey)) || []
   // console.log(res)
   const resPulsId = res.map((x) => {
     return {
@@ -146,7 +146,7 @@ const clearList = () => {
       <button
         class="btn btn-close"
         @click="clearList"
-        style="position: absolute; right: 3px;top:2px;"
+        style="position: absolute; right: 3px; top: 2px"
       ></button>
     </div>
     <div class="list">
@@ -173,28 +173,46 @@ const clearList = () => {
     background-color: rgba(0, 0, 255);
   }
 }
-input{
-  box-sizing: border-box;
-  &:focus{
-    border: rgb(0, 0, 0) solid 0.2rem;
-    box-shadow: 0px 0px 0 2px rgb(255, 255, 255);
+input {
+  // box-sizing: border-box;
+  // &:focus{
+  //   border: rgb(0, 0, 0) solid 0.2rem;
+  //   box-shadow: 0px 0px 0 2px rgb(255, 255, 255);
+  // }
+}
+
+@keyframes searching1 {
+  from {
+    border: yellow solid 0.2rem;
+    box-shadow: 0 0 1px 1px rgb(255, 191, 0);
+    // transform: scale(0);
+  }
+  50% {
+    border: rgb(255, 153, 0) solid 0.2rem;
+    box-shadow: 0 0 3px 3px rgb(255, 187, 0);
+    // transform: scale(1);
+  }
+  to {
+    border: rgb(255, 98, 0) solid 0.2rem;
+    box-shadow: 0 0 6px 6px rgb(255, 123, 0);
+    // transform: scale(2);
   }
 }
-// .searching {
-//   &:focus{
-//     border: rgb(249, 203, 0) solid 0.2rem;
-//   }
-// }
-// .nothing {
-//   &:focus{
-//     border: rgb(249, 71, 0) solid 0.2rem;
-//   }
-// }
-// .searched {
-//   &:focus{
-//     border: rgb(58, 249, 0) solid 0.2rem;
-//   }
-// }
+.searching {
+  animation: searching1 linear alternate-reverse 1s;
+  animation-iteration-count: 10;
+  border: rgb(249, 203, 0) solid 0.2rem;
+}
+.nothing,
+.nothing:focus,
+.nothing::marker {
+  border: rgb(249, 71, 0) solid 0.2rem;
+  box-shadow: 0 0 5px 0px RED;
+}
+.searched {
+  border: rgb(58, 249, 0) solid 0.2rem;
+  box-shadow: 0 0 5px 0px rgb(34, 255, 0);
+}
 .list {
   color: black;
   max-height: 250px;
