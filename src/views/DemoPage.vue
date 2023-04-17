@@ -1,171 +1,180 @@
 <script setup>
-import { ref, reactive } from 'vue'
-import { LightBoxBase } from '@/components'
-import { AutoComplete, autoCompleteConfig } from '../components/AutoComplete'
-
 //@ts-check
+import { ref, reactive } from 'vue';
+import { LightBoxBase } from '../components';
+import { AutoComplete, autoCompleteConfig } from '../components/AutoComplete';
+
 function _uuid() {
-  var d = Date.now()
+  var d = Date.now();
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
-    d += performance.now() //use high-precision timer if available
+    d += performance.now(); //use high-precision timer if available
   }
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = (d + Math.random() * 16) % 16 | 0
-    d = Math.floor(d / 16)
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
-  })
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
 }
-const loading = ref(false)
+const loading = ref(false);
 const load = () => {
-  loading.value = true
-}
+  loading.value = true;
+};
 const loaded = () => {
-  loading.value = false
-}
+  loading.value = false;
+};
 
 class Man {
-  id
-  name = ''
-  age = 0
-  select = ''
-  constructor(name, age, select) {
-    this.id = _uuid()
-    this.name = name || ''
-    this.age = age || null
-    this.select = select || ''
+  id;
+  name = '';
+  age = 0;
+  select = '';
+  newObject = { name: '', id: null };
+  constructor(name, age, select, newObject) {
+    this.id = _uuid();
+    this.name = name || '';
+    this.age = age || null;
+    this.select = select || '';
+    this.newObject = newObject;
   }
 }
 
 /**
- * @typedef {import('vue').reactive} reactive
- * @typedef {{id:string; name:string;age:number;select:string}} Mann
- * @type {Mann []}
- */
-const manData = reactive([])
-const manReactive = reactive(new Man())
-Object.assign(manData, [
-  new Man('Charlie', 22, 'Sick'),
-  new Man('Allen', 21, 'Smart'),
-  new Man('Jacky', 24, 'HandSome and smart'),
-  new Man('Bruce', 28, 'HandSome')
-])
 
-const showManBox = ref(false)
+ * @type {import('vue').UnwrapNestedRefs<Man[]>}
+ */
+const manData = reactive([]);
+const manReactive = reactive(new Man());
+Object.assign(manData, [
+  new Man('Charlie', 22, 'Sick', { name: 'Habana', id: 1 }),
+  new Man('Allen', 21, 'Smart', { name: 'NO NO NO', id: 2 }),
+  new Man('Jacky', 24, 'HandSome and smart', { name: 'I do not know', id: 22 }),
+  new Man('Bruce', 28, 'HandSome', { name: 'I do not know', id: 22 })
+]);
+
+const showManBox = ref(false);
 const getManApi = (manId) => {
-  console.log('go')
-  load()
+  console.log('go');
+  load();
   return new Promise((resolve) => {
     const t = setTimeout(() => {
       // console.log(manData);
       // console.log(number);
-      const temp = manData.find((man) => man.id == manId)
-      clearInterval(t)
-      resolve(temp)
-      loaded()
-    }, 2000)
-  })
-}
+      const temp = manData.find((man) => man.id == manId);
+      clearInterval(t);
+      resolve(temp);
+      loaded();
+    }, 2000);
+  });
+};
 const getMan = (manId) => {
-  Object.assign(manReactive, { name: '', age: null, id: null, select: '' })
+  Object.assign(manReactive, { name: '', age: null, id: null, select: '' });
+  manIdConfig.setDefaultData({ name: '', age: null, id: null, select: '' });
   if (manId == null) {
     if (testModel.value == 0) {
-      showManBox.value = true
+      showManBox.value = true;
     }
-    return
+    return;
   }
   getManApi(manId).then((res) => {
-    Object.assign(manReactive, res)
-    manConfig.setDefaultData(res.select || '')
-    manIdConfig.setDefaultData(res.select)
+    Object.assign(manReactive, res);
+    manConfig.setDefaultData(res.select || '');
+    manIdConfig.setDefaultData(res);
     if (testModel.value == 0) {
-      showManBox.value = true
+      showManBox.value = true;
     }
-  })
-}
+  });
+};
 
 const saveManApi = () => {
-  console.log('doSave')
-  load()
+  console.log('doSave');
+  load();
   return new Promise((resolve) => {
     const t = setTimeout(() => {
-      console.log(manReactive.id)
+      console.log(manReactive.id);
       if (manReactive.id == null) {
-        manReactive.id = _uuid()
+        manReactive.id = _uuid();
       }
-      const temp = manData.find((man) => man.id == manReactive.id)
-      const index = manData.indexOf(temp)
+      /**
+       * @type {Man|undefined}
+       */
+      const temp = manData.find((man) => {
+        man.id == manReactive.id;
+      });
+      const index = temp ? manData.indexOf(temp) : -1;
       if (index == -1) {
-        const temp = Object.assign({}, manReactive)
-        manData.push(temp)
-        loaded()
-        resolve(manReactive)
-        return
+        const temp = Object.assign({}, manReactive);
+        manData.push(temp);
+        loaded();
+        resolve(manReactive);
+        return;
       }
 
-      Object.assign(manData[index], manReactive)
-      console.log(temp)
-      clearInterval(t)
-      resolve(temp)
-      loaded()
-    }, 500)
-  })
-}
+      Object.assign(manData[index], manReactive);
+      console.log(temp);
+      clearInterval(t);
+      resolve(temp);
+      loaded();
+    }, 500);
+  });
+};
 
 const saveMan = () => {
   saveManApi().then(() => {
-    alert('成功')
-  })
-  showManBox.value = false
-  console.log(manReactive)
-}
+    alert('成功');
+  });
+  showManBox.value = false;
+  console.log(manReactive);
+};
 
 function searchSelectListAPI(searchKey) {
   return new Promise((resolve) => {
     // load()
     const t = setTimeout(() => {
       const manList = manData.filter((man) => {
-        return man.select.startsWith(searchKey)
-      })
+        return man.select.startsWith(searchKey);
+      });
       const res = manList.map((man) => {
-        return man.select
-      })
-      resolve(res)
-      clearTimeout(t)
+        return man.select;
+      });
+      resolve(res);
+      clearTimeout(t);
       // loaded()
-    }, 2500)
-  })
+    }, 2500);
+  });
 }
 
 // const autoTrigger = ref(false);
-const manConfig = autoCompleteConfig(searchSelectListAPI)
-const testModel = ref(0)
+const manConfig = autoCompleteConfig(searchSelectListAPI);
+const testModel = ref(0);
 const changeModel = () => {
   if (testModel.value == 0) {
-    testModel.value = 1
-    return
+    testModel.value = 1;
+    return;
   }
-  testModel.value = 0
-}
+  testModel.value = 0;
+};
 const test1 = () => {
-  getMan(manReactive.id)
-}
+  console.log(manReactive.id);
+  getMan(manIdConfig.result ? manIdConfig.result.id : 0);
+};
 const getIdListApi = (input) => {
   return new Promise((resolve) => {
     const t = setTimeout(() => {
       const manList = manData.filter((man) => {
-        return man.id.startsWith(input)
-      })
-      const res = manList.map((man) => {
-        return man.id
-      })
-      console.log(manList)
-      console.log(res)
-      clearTimeout(t)
-      resolve(res)
-    }, 5000)
-  })
-}
-const manIdConfig = autoCompleteConfig(getIdListApi)
+        return man.id.startsWith(input);
+      });
+      // const res = manList.map((man) => {
+      //   return man.id
+      // })
+      console.log(manList);
+      // console.log(res)
+      clearTimeout(t);
+      resolve(manList);
+    }, 5000);
+  });
+};
+const manIdConfig = autoCompleteConfig(getIdListApi);
+manIdConfig.propertyName = 'id';
 </script>
 
 <template>
@@ -183,8 +192,9 @@ const manIdConfig = autoCompleteConfig(getIdListApi)
             <div class="col-4">ID</div>
             <div class="col-8">
               <AutoComplete
-                v-model="manReactive.id"
+                v-model="manReactive"
                 :config="manIdConfig"
+                v-model:result="manIdConfig.result"
                 :changeFunction="test1"
               />
             </div>
@@ -254,7 +264,7 @@ const manIdConfig = autoCompleteConfig(getIdListApi)
                       <div class="col-4">ID</div>
                       <div class="col-8">
                         <AutoComplete
-                          v-model="manReactive.id"
+                          v-model="manReactive"
                           :config="manIdConfig"
                           :changeFunction="test1"
                         />

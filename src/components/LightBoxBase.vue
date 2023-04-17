@@ -59,14 +59,14 @@ const closeBtnSwitch = computed(() => {
 })
 /**
  * 用來判斷是否顯示title的X按鈕
- * @type {ComputedRef<boolean>}
- * @returns {boolean}
+ * @type {import('vue').ComputedRef<boolean>}
  */
 const closeIconSwitch = computed(() => {
   return switchFunction('dis_close_icon')
 })
+
 /**
- * @type {Ref<string>}
+ * @type {import('vue').Ref<string>}
  */
 const addClass = ref('')
 </script>
@@ -77,7 +77,7 @@ const addClass = ref('')
       <div class="lightBox" :="$attrs" @click.prevent.stop="" :class="addClass">
         <div class="header">
           <h5 class="title">
-            <slot name="titel">警告</slot>
+            <slot name="title">警告</slot>
           </h5>
           <button
             class="btn-close"
