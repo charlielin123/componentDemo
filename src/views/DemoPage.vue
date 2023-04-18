@@ -184,7 +184,7 @@ manIdConfig.propertyName = 'id';
         <h1>Loading....</h1>
       </div>
     </div>
-    <LightBoxBase v-model:show="showManBox" esc backdrop>
+    <LightBoxBase v-model:show="showManBox">
       <template #title>我是燈箱</template>
       <template #body>
         <div class="container" style="width: 600px">
@@ -303,6 +303,8 @@ manIdConfig.propertyName = 'id';
       </div>
     </div>
   </div>
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus quibusdam debitis reprehenderit hic optio suscipit architecto, est, porro cum voluptate quod voluptatem cumque ex ipsa officiis minus natus corrupti aliquam!
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis hic deleniti ex? Velit quibusdam unde sequi fugit accusamus expedita quae. Ex reiciendis quod exercitationem qui nihil est corporis id eius laborum ea iusto laudantium quaerat, commodi sequi quis dignissimos fuga numquam! Qui, sed! Optio facere tenetur quis aliquam, rem dolore possimus ipsa quia illo fugiat quas dolorum enim asperiores nesciunt aperiam, pariatur labore? Cupiditate, sequi et officiis velit voluptas earum repudiandae reprehenderit quibusdam. Dolorem, excepturi quidem? Neque aliquid quia aspernatur dolorum quam minima totam delectus cumque, voluptatem animi optio quos beatae vitae. Sit veniam id neque assumenda possimus praesentium dolor delectus itaque tempore, alias nisi eius. Iure beatae voluptatem repellendus laboriosam adipisci nisi ut aspernatur blanditiis aliquid, neque deleniti mollitia in voluptatum quos itaque sapiente harum quas natus. Facilis quos consectetur, quidem, repudiandae assumenda dicta officiis dolor dolore, esse commodi aut vitae perspiciatis maiores amet laboriosam magni! Minus nulla nesciunt quae architecto amet hic quidem. Modi distinctio error illum dolorem est voluptatum, consequatur temporibus culpa praesentium! Magnam cupiditate illo libero soluta illum eveniet voluptatum natus consequatur, sed veritatis aperiam culpa saepe necessitatibus, vel neque excepturi facere! Ratione eaque distinctio ducimus, mollitia quae veniam aut dignissimos, rerum veritatis necessitatibus porro voluptatibus ea inventore fugiat reprehenderit explicabo, exercitationem id in ad. Nemo vitae magni cum veniam nulla hic aperiam saepe! Pariatur cupiditate aut, ullam voluptates maxime at corporis laudantium et, asperiores distinctio assumenda voluptatum expedita, culpa officiis ratione quo velit rerum error dicta earum! Quos saepe incidunt, deserunt rem consequatur accusantium non, error, culpa esse distinctio assumenda hic sint. Commodi atque, ratione voluptas voluptates assumenda tempora quia doloremque error rerum nesciunt laboriosam facilis eligendi dolorem! Debitis quas perspiciatis assumenda alias nostrum consequuntur dolorum omnis adipisci? Magni asperiores quibusdam exercitationem fugit corporis ratione itaque. Illum quaerat doloribus, velit dolores voluptate excepturi soluta exercitationem!
 </template>
 
 <style lang="scss" scoped>

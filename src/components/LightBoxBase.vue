@@ -3,17 +3,25 @@
 // 使用普通的 <script> 来声明选项
 export default {
   inheritAttrs: false
-}
+};
 </script>
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, watch } from 'vue';
 
-const props = defineProps(['show', 'body_style', 'dis_close_btn', 'dis_close_icon', 'backdrop','esc'])
+const props = defineProps([
+  'show',
+  'body_style',
+  'dis_close_btn',
+  'dis_close_icon',
+  'backdrop',
+  'esc'
+]);
 
-const emit = defineEmits(['update:show'])
+const emit = defineEmits(['update:show']);
 const close = () => {
-  emit('update:show', false)
-}
+  document.body.setAttribute('style', '');
+  emit('update:show', false);
+};
 
 /**
  * 檢測父組件是否有對應的prop 如有返回false 用來切換部分元素的顯示
@@ -21,25 +29,33 @@ const close = () => {
  */
 const switchFunction = (propsName) => {
   if (props[propsName] === '' || props[propsName] === true || props[propsName] === 'true') {
-    return false
+    return false;
   }
-  return true
-}
+  return true;
+};
 /**
  * 點擊燈箱外觸發
  * 如果有prop backdrop 則關閉視窗
+ * @param {Event} e
  */
-const clickOutside = () => {
-  if (props.backdrop == '') {
-    close()
+const clickOutside = (e) => {
+  const animationKey = [
+    { transform: 'scale(1)' },
+    { transform: 'scale(1.02)' },
+    { transform: 'scale(1)' }
+  ];
+
+  if (!backDropSwitch.value) {
+    close();
   } else {
-    addClass.value = 'pop'
-    const t = setTimeout(() => {
-      addClass.value = ''
-      clearInterval(t)
-    }, 500)
+    e.target.querySelector('.lightBox').animate(animationKey, {
+      duration: 500,
+      iterations: 1,
+      animationFillMode: 'forwards',
+      animationTimingFunction: 'ease-in-out'
+    });
   }
-}
+};
 
 /**
  * 用來判斷是否顯示footer的關閉按鈕
@@ -47,34 +63,60 @@ const clickOutside = () => {
  * @returns {boolean}
  */
 const escSwitch = computed(() => {
-  return switchFunction('esc')
-})
+  return switchFunction('esc');
+});
 /**
  * 用來判斷是否顯示footer的關閉按鈕
  * @type {ComputedRef<boolean>}
  * @returns {boolean}
  */
 const closeBtnSwitch = computed(() => {
-  return switchFunction('dis_close_btn')
-})
+  return switchFunction('dis_close_btn');
+});
 /**
  * 用來判斷是否顯示title的X按鈕
  * @type {import('vue').ComputedRef<boolean>}
  */
 const closeIconSwitch = computed(() => {
-  return switchFunction('dis_close_icon')
+  return switchFunction('dis_close_icon');
+});
+watch(props.show,()=>{
+  if (switchFunction('backDrop')||props.show) {
+    document.body.setAttribute('style', 'overflow:hidden');
+  }
 })
 
 /**
- * @type {import('vue').Ref<string>}
+ *
+ * @param {Event} e
  */
-const addClass = ref('')
+function test(e) {
+  /**
+   * @type {HTMLElement}
+   */
+  const element = e.target;
+  element.focus();
+}
 </script>
 
 <template>
   <transition name="lightBox">
-    <div class="outSideContainer" v-if="show" @click.prevent.stop="clickOutside()" @keydown.esc="escSwitch?'close()':close()">
-      <div class="lightBox" :="$attrs" @click.prevent.stop="" :class="addClass">
+    <div
+      class="outSideContainer"
+      v-if="show"
+      @click.stop="clickOutside($event)"
+      @keydown.esc="escSwitch ? 'close()' : close()"
+    >
+      <div
+        class="lightBox"
+        :="$attrs"
+        @click.stop="test($event)"
+        @focus="
+          () => {
+            console.log('asd');
+          }
+        "
+      >
         <div class="header">
           <h5 class="title">
             <slot name="title">警告</slot>
@@ -82,10 +124,7 @@ const addClass = ref('')
           <button
             class="btn-close"
             v-if="closeIconSwitch"
-            @click="
-              close(),
-              $emit('update:show', false)
-            "
+            @click="close(), $emit('update:show', false)"
           ></button>
         </div>
         <div class="lightBoxBody" :style="body_style">
@@ -113,10 +152,6 @@ const addClass = ref('')
     transform: scale(1);
   }
 }
-.pop {
-  animation: test ease-in-out 0.3s forwards;
-}
-
 .outSideContainer {
   width: 100vw;
   height: 100vh;
@@ -131,6 +166,9 @@ const addClass = ref('')
   align-items: center;
 
   .lightBox {
+    &:focus {
+      background-color: black;
+    }
     z-index: 1056;
     position: relative;
     display: flex;

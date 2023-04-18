@@ -143,7 +143,7 @@ const inputChange = (e) => {
   const target = e.target;
   dataList.length = 0;
   clearTimeout(timer);
-  inputValue.value = target.value;
+  // inputValue.value = target.value;
 
   // emit('update:modelValue', target.value)
   if (target.value == '') {
