@@ -25,7 +25,7 @@ const close = () => {
 
 /**
  * 檢測父組件是否有對應的prop 如有返回false 用來切換部分元素的顯示
- * @param {"dis_close_btn" | "dis_close_icon"} propsName
+ * @param {"dis_close_btn" | "dis_close_icon"| "esc"} propsName
  */
 const switchFunction = (propsName) => {
   if (props[propsName] === '' || props[propsName] === true || props[propsName] === 'true') {
@@ -45,9 +45,11 @@ const clickOutside = (e) => {
     { transform: 'scale(1)' }
   ];
 
-  if (!backDropSwitch.value) {
+  if (props.backdrop == '' || props.backdrop == true) {
     close();
-  } else {
+  } else if (e.target) {
+    
+    // @ts-ignore
     e.target.querySelector('.lightBox').animate(animationKey, {
       duration: 500,
       iterations: 1,
@@ -59,7 +61,7 @@ const clickOutside = (e) => {
 
 /**
  * 用來判斷是否顯示footer的關閉按鈕
- * @type {ComputedRef<boolean>}
+ * @type {import('vue').ComputedRef<boolean>}
  * @returns {boolean}
  */
 const escSwitch = computed(() => {
@@ -67,7 +69,7 @@ const escSwitch = computed(() => {
 });
 /**
  * 用來判斷是否顯示footer的關閉按鈕
- * @type {ComputedRef<boolean>}
+ * @type {import('vue').ComputedRef<boolean>}
  * @returns {boolean}
  */
 const closeBtnSwitch = computed(() => {
@@ -80,23 +82,11 @@ const closeBtnSwitch = computed(() => {
 const closeIconSwitch = computed(() => {
   return switchFunction('dis_close_icon');
 });
-watch(props.show,()=>{
-  if (switchFunction('backDrop')||props.show) {
+watch(props.show, () => {
+  if (props.backdrop == '' || props.show || props.backdrop == true) {
     document.body.setAttribute('style', 'overflow:hidden');
   }
-})
-
-/**
- *
- * @param {Event} e
- */
-function test(e) {
-  /**
-   * @type {HTMLElement}
-   */
-  const element = e.target;
-  element.focus();
-}
+});
 </script>
 
 <template>
@@ -104,19 +94,10 @@ function test(e) {
     <div
       class="outSideContainer"
       v-if="show"
-      @click.stop="clickOutside($event)"
+      @click.stop.prevent="clickOutside($event)"
       @keydown.esc="escSwitch ? 'close()' : close()"
     >
-      <div
-        class="lightBox"
-        :="$attrs"
-        @click.stop="test($event)"
-        @focus="
-          () => {
-            console.log('asd');
-          }
-        "
-      >
+      <div class="lightBox" :="$attrs" @click.stop="">
         <div class="header">
           <h5 class="title">
             <slot name="title">警告</slot>

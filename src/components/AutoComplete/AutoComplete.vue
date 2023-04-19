@@ -1,24 +1,24 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, toRef } from 'vue';
 import { watch, toRefs, reactive, ref, onMounted } from 'vue';
 //@ts-check
-const inputClass = ref('');
-const searching = () => {
-  inputClass.value = 'searching';
-};
-const searched = () => {
-  if (dataList.length > 0) {
-    inputClass.value = 'searched';
-  } else {
-    inputClass.value = 'nothing';
+function _uuid() {
+  var d = Date.now();
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    d += performance.now(); //use high-precision timer if available
   }
-};
-/**
- * @type {Readonly<{modelValue:string|null|Object,changeFunction:Function,config:{result,propertyName:string,trigger:boolean,defaultData:any,api:Function}}>}
- */
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+const idBase=_uuid();
+
+
 const props = defineProps({
   modelValue: {
-    type: [String, null, Object],
+    type: [String, Object],
     required: true
   },
   changeFunction: {
@@ -31,8 +31,8 @@ const props = defineProps({
     required: true,
     default: () => {
       return {
-        result: null,
-        propertyName: null,
+        outPutProperty: 'id',
+        showProperty: 'name',
         trigger: false,
         defaultData: '',
         api: () => {}
@@ -40,216 +40,152 @@ const props = defineProps({
     }
   }
 });
-const isObject = computed(() => {
-  if (props.config.propertyName) {
-    return true;
-  }
-  return false;
-});
+const { trigger } = toRefs(props.config);
+const emit = defineEmits(['update:modelValue']);
 
-// eslint-disable-next-line vue/no-setup-props-destructure
-const { propertyName } = props.config;
-const emit = defineEmits(['update:modelValue', 'update:result']);
-const { modelValue } = toRefs(props);
-const { defaultData, trigger } = toRefs(props.config);
-/**
- * 顯示清單
- * @type {reactive<string[]>}
- */
-const dataList = reactive([]);
-/**
- * @type {number}
- * @description 延遲搜尋時間 單位毫秒
- */
-const timeDelay = 1000;
-/**
- * 放置計時器物件
- * @type {number}
- */
+const inputValue = ref('');
+const state = reactive({
+  /**
+   * @type {"static"|"searching"|"failed"|"complete"|"stop"}
+   */
+  status: 'static',
+  optionList: [],
+  selectedIndex: 0,
+  selectedObj: {}
+});
 let timer;
+const selectedIndex = toRef(state, 'selectedIndex');
 /**
- * 搜尋後暫存清單
- * @type {string[]}
+ * 0為string模式
+ * 1為回傳指定Property
+ * 2為回傳obj本身
  */
-let tempList = [];
-
-/**
- *
- * @param {Function} todo
- * @param {any} param
- */
-const delayDo = (todo, param) => {
-  timer = setTimeout(() => {
-    todo(param);
-  }, timeDelay);
-};
-onMounted(() => {
-  if (isObject.value) {
-    inputValue.value = defaultData.value[propertyName];
+const model = computed(() => {
+  if (typeof props.modelValue == 'string') {
+    return 0;
   } else {
-    inputValue.value = defaultData.value;
+    return 1;
   }
-  tempList.length = 0;
-  clearList();
 });
 
-watch([defaultData, trigger], () => {
-  console.log('defaultData or trigger change');
-  if (isObject.value) {
-    // insideDefaultData.value = defaultData.value[props.config.propertyName]
-    inputValue.value = defaultData.value[propertyName];
-  } else {
-    inputValue.value = defaultData.value;
-
-    // insideDefaultData.value = defaultData.value
-  }
-  tempList.length = 0;
-  clearList();
-  clearTimeout(timer);
-});
-/**
- * 執行API並新增資料進tempList，過濾tempList內容放入dataList並顯示
- * @param {string} searchKey 查詢關鍵字
- */
-const doSearch = async (searchKey) => {
-  searching();
-  /**
-   * @type {string[]}
-   */
-  const res = (await props.config.api(searchKey)) || [];
-  console.log(res);
-  tempList = [...res];
-  if (isObject.value) {
-    Object.assign(
-      dataList,
-      tempList.filter((i) => i[propertyName].startsWith(searchKey))
-    );
-  } else {
-    Object.assign(
-      dataList,
-      tempList.filter((i) => i.startsWith(searchKey))
-    );
-  }
-  searched();
+const getValue = (obj) => {
+  if (model.value == 0) return obj;
+  return obj[props.config.showProperty];
 };
-/**
- * 當
- * @param {Event} e
- */
+
 const inputChange = (e) => {
-  /**
-   * @type {HTMLOptionElement}
-   */
-  const target = e.target;
-  dataList.length = 0;
+  state.status = 'static';
   clearTimeout(timer);
-  // inputValue.value = target.value;
+  state.optionList = [];
+  timer = setTimeout(async () => {
+    state.status = 'searching';
+    const res = await props.config.api(e.target.value);
+    const ans = res.filter((obj) => {
+      obj[props.config.showProperty].startsWith(e.target.value);
+    });
 
-  // emit('update:modelValue', target.value)
-  if (target.value == '') {
+    // @ts-ignore
+    if (state.status == 'stop') {
+      state.status = 'static';
+      return;
+    }
+    Object.assign(state.optionList, ans);
+    if (res.length > 0) {
+      state.status = 'complete';
+    } else {
+      state.status = 'failed';
+    }
+    clearTimeout(timer);
+  }, 2000);
+};
+const changeIndex = (index) => {
+  state.selectedIndex = index;
+};
+
+const goUp = () => {
+  if (state.optionList.length > 0 && state.selectedIndex == 0) {
+    state.selectedIndex = state.optionList.length;
+  } else {
+    state.selectedIndex = state.optionList.length + 1;
+  }
+};
+const goDown = () => {
+  if (state.optionList.length > 0 && state.selectedIndex == state.optionList.length) {
+    state.selectedIndex = state.optionList.length;
+  } else {
+    state.selectedIndex = state.optionList.length - 1;
+  }
+};
+
+const submit = (index) => {
+  if (index) state.selectedIndex = index;
+  let finalData;
+  if (model.value == 1 && props.config.outPutProperty != 'obj') {
+    finalData = state.selectedObj[state.selectedIndex][props.config.outPutProperty];
+  } else {
+    finalData = state.selectedObj[state.selectedIndex];
+  }
+
+  emit('update:modelValue', finalData);
+};
+const clearList = () => {
+  state.status = 'stop';
+  state.optionList.length = 0;
+  clearTimeout(timer);
+};
+const blur = () => {
+  clearList();
+  state.status = 'stop';
+  if (props.config.outPutProperty == 'obj') {
+    const tmp = props.config.outPutProperty;
+    emit('update:modelValue', { [tmp]: '' });
     return;
   }
-  delayDo(doSearch, target.value);
+  emit('update:modelValue', '');
 };
-/**
- * 當按下下拉清單中的項目時執行
- * 更改主元件與v-model綁定物件的值
- * 如果有放props.changeFunction 也會在此執行
- * @param {number} index
- */
-const submit = (index) => {
-  let tmp = [...dataList];
-  let res;
-  if (index != null) {
-    res = tmp[index];
+
+onMounted(() => {
+  if (model.value == 0) {
+    inputValue.value = props.config.defaultData;
   } else {
-    res = tmp[selectedIndex.value];
+    inputValue.value = props.config.defaultData[props.config.showProperty];
   }
+});
 
-  console.log(res);
-
-  emit('update:result', res);
-  // emit('update:modelValue', res)
-  props.changeFunction();
-  clearList();
-};
-const selectedIndex = ref(null);
-const clearList = () => {
-  dataList.length = 0;
-  selectedIndex.value = null;
-};
-watch(modelValue, () => {
-  inputValue.value = modelValue.value;
-  defaultData.value = modelValue.value;
+watch(trigger, () => {
+  if (model.value == 0) {
+    inputValue.value = props.config.defaultData;
+  } else {
+    inputValue.value = props.config.defaultData[props.config.showProperty];
+  }
 });
 
 watch(selectedIndex, () => {
-  if (selectedIndex.value == null) {
-    return;
-  }
-  console.log(selectedIndex.value);
-  document.querySelectorAll('.list .option').forEach((ele) => ele.classList.remove('hover'));
-  if (selectedIndex.value != null) {
-    document.querySelectorAll('.list .option')[selectedIndex.value].classList.add('hover');
-  }
-});
+  document.getElementById(idBase+'select')?.querySelectorAll('.hover').forEach((ele)=>{
+    ele.classList.remove('hover');
+    if(ele.id==idBase+selectedIndex.value){
+      ele.classList.remove('hover');
 
-/**
- *
- */
-function goDown() {
-  if (dataList.length == 0) return;
-  if (selectedIndex.value != null && selectedIndex.value != dataList.length - 1) {
-    selectedIndex.value = selectedIndex.value + 1;
-  } else {
-    selectedIndex.value = 0;
+    }
+  })
+  if (state.optionList.length == 0) {
+    return;
   }
-}
-
-function goUp() {
-  if (dataList.length == 0) return;
-  if (selectedIndex.value != null && selectedIndex.value != 0) {
-    selectedIndex.value = selectedIndex.value - 1;
-  } else {
-    selectedIndex.value = dataList.length - 1;
-  }
-}
-const optionValueList = computed(() => {
-  if (isObject.value) {
-    console.log(dataList);
-    return dataList.map((i) => {
-      console.log(i[propertyName]);
-      return i[propertyName];
-    });
-  }
-  return dataList;
+  state.selectedObj = state.optionList[selectedIndex.value];
 });
-/**
- * @type {} input內顯示的字串
- */
-const inputValue = ref('');
-const blur = () => {
-  if (isObject.value && defaultData.value[propertyName] == inputValue.value) {
-    return;
-  }
-  if (!isObject.value && defaultData.value == inputValue.value) {
-    return;
-  }
-  inputValue.value = '';
-};
 </script>
 
 <template>
   <div style="width: 300px; position: relative; flex-direction: column" class="d-flex">
     <div class="d-flex">
       <input
-        :class="inputClass"
+        :class="state.status"
         style="width: 100%; padding-right: 2rem; box-sizing: border-box"
         :value="inputValue"
         type="text"
-        @keydown.down="goDown($event)"
-        @keydown.up="goUp($event)"
-        @keydown.enter="submit(index)"
+        @keydown.down="goDown()"
+        @keydown.up="goUp()"
+        @keydown.enter="submit()"
         @input="inputChange($event)"
         @blur="blur"
       />
@@ -259,10 +195,10 @@ const blur = () => {
         style="position: absolute; right: 3px; top: 2px"
       ></button>
     </div>
-    <div class="list">
-      <template v-for="(item, index) in optionValueList" :key="item.value">
-        <div class="border w-100 option" @click="submit(index)">
-          {{ item }}
+    <div class="list" :id="idBase+'select'">
+      <template v-for="(item, index) in state.optionList" :key="item.value">
+        <div class="border w-100 option" :id="idBase+index" @mouseover="changeIndex(index)" @click="submit(index)">
+          {{ getValue(item) }}
         </div>
       </template>
     </div>
@@ -320,10 +256,10 @@ const blur = () => {
   }
 }
 
-.nothing:focus {
+.fail:focus {
   animation: searchFailed alternate-reverse 0.5s 3 ease-in-out;
 }
-.searched:focus {
+.success:focus {
   border: rgb(58, 249, 0) solid 0.2rem;
   box-shadow: 0 0 8px 3px rgb(34, 255, 0);
 }
