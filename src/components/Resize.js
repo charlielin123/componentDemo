@@ -213,15 +213,21 @@ export const draggable = (el, bind, vNode) => {
   let startTop = 0;
   let startLeft = 0;
 
-  const startHeight = el.clientHeight;
-  const startWidth = el.clientWidth;
+  let startHeight = el.clientHeight;
+  let startWidth = el.clientWidth;
   let dragBar = bind.value;
+  let inner = bind.value?.inner;
   if (!(dragBar instanceof HTMLElement)) {
     dragBar = document.querySelector(dragBar);
   }
   if (!dragBar) return;
   dragBar.style.cursor = 'move';
-  // console.log(bind.value)
+
+  const maxHeight = inner?.clientHeight || window.innerHeight;
+  const maxWidth = inner?.clientWidth || window.innerWidth;
+  const borderTop = inner?.offsetTop || 0;
+  const borderLeft = inner?.offsetLeft || 0;
+
   const initDrag = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -235,9 +241,9 @@ export const draggable = (el, bind, vNode) => {
   };
   let f11 = false;
   /**
-   * 
-   * @param {MouseEvent} event 
-   * @returns 
+   *
+   * @param {MouseEvent} event
+   * @returns
    */
   const drag = (event) => {
     if (!dragging) return;
@@ -257,20 +263,20 @@ export const draggable = (el, bind, vNode) => {
 
     let top = startTop + deltaY;
     let left = startLeft + deltaX;
-    if (top + 10 >= window.innerHeight - el.clientHeight) {
-      top = window.innerHeight - el.clientHeight;
+    if (top + 10 >= maxHeight - el.clientHeight) {
+      top = maxHeight - el.clientHeight;
     }
     if (top <= 10) {
       top = 0;
-      el.style.width = window.innerWidth + 'px';
-      el.style.height = window.innerHeight + 'px';
-      f11 = true;
+      // el.style.width = maxWidth + 'px';
+      // el.style.height = maxHeight + 'px';
+      // f11 = true;
     }
     if (left <= 10) {
       left = 0;
     }
-    if (left + 10 > window.innerWidth - el.clientWidth) {
-      left = window.innerWidth - el.clientWidth;
+    if (left + 10 > maxWidth - el.clientWidth) {
+      left = maxWidth - el.clientWidth;
     }
 
     el.style.top = plusPx(top);
